@@ -1,4 +1,5 @@
 # List of locations including description and links to other destinations
+
 locations = {
     'forest' : {
         'name':'forest',
