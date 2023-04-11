@@ -1,5 +1,31 @@
-# List of locations including description and links to other destinations
+import json
+import random
+import items_generator # doesn't work in isolation as needs the actual file in the main branch of the group project
 
+#TODO - SEE COMMENTS IN investigate_object function below
+
+#GEORGE = BATTLES
+#TANYA = TBC
+#JUSTIN = GENERATE ITEMS E.G. HEALTH, WEAPONS AND ATTACKS
+#TOBI = XP AND LEVELLING UP
+#GEORGE = BASE CODE
+#FABIAN = ENEMIES LIST
+# QUESTIONS: Do I need to push the found item to the player_data file or is there a function somewhere I can call for that?
+
+# Using 'with' closes the file after use. As 'file' creates a variable
+with open('player_data.txt', 'r')as file:
+    #assigns parsed contents to the variable 'player_data'
+    player_data = json.load(file)
+
+#THIS SAVE FUNCTION IS POSSIBLY NEEDED IN FUTURE VERSIONS
+#def save(data):
+    #data = json.dumps(data)
+    #with open('player_data.txt', 'w')as file:
+        #file.write(data)
+
+#descript_lst = ['dark', ]
+
+# List of locations including description and links to other destinations
 locations = {
     'forest' : {
         'name':'forest',
@@ -10,7 +36,7 @@ locations = {
             3:'Spotted mushrooms'
         },
         'destinations': {
-            4:'Meadow',
+            4:'Meadow', 
             5:'Path'
         }
     },
@@ -169,32 +195,71 @@ locations = {
     }
 }
 
+#extracting location keys for random generator
+loc_list = list(locations)
+
+#return random location from loc_list
+def generate_location() :
+    #returns a random location name
+    return random.choice(loc_list)
+
 # setting current location
-current_location = 'forest'
+current_location = generate_location()
+
+#function to create the 'dungeon' i.e. series of locations/rooms to explore for each game instance
+def create_dungeon() :
+    #variable to set random number of linked locations/rooms
+    num_of_rooms = random.choice(range(1,8))
+    print(num_of_rooms)
+    dungeon = {}
+    i = 1
+    while i <= num_of_rooms :
+        print(num_of_rooms)
+        random_location = generate_location()
+        dungeon.update({random_location : locations[random_location]})
+        print(i)
+        i += 1
+        print(random_location)
+    print(dungeon)
+
+create_dungeon()
+
+#setting the random game_item variable by calling the inventory_edit function from items_generator file
+game_item = items_generator.inventory_edit()
+
+#function to decide whether an object has a hidden item attached when investigated
+def investigate_object() :
+    #variable to decide whether or not an item is attached to a physical object in locations
+    is_item = random.choice([True, False])
+
+    #if is_item is True, declare attached_item to be the random game_item
+    if (is_item == True) :
+        attached_item = game_item
+        #Todo 
+        # - potentially look at how the received item is pushed to the player inventory
+        # - code to inform player of received item on terminal
+
+#CURRENTLY REDUNDANT CODE THAT MIGHT BE USEFUL FOR THE MAIN CODE GEORGINA IS DOING
 
 # Function to print current location with description
-def print_location() :
+def print_location(current_location) :
     loc = locations[current_location]['name']
     desc = locations[current_location]['description']
     print(f'You are in a {desc} {loc}.')
 
-print_location()
 
 # Function to print objects in current location
-def list_objects() :
+def list_objects(current_location) :
     print(f'You look around and see: \n')
-    for i, j in locations[current_location]['objects'].items():
-        print(i, ': ', j)
+    for key, value in locations[current_location]['objects'].items():
+        print(key, ': ', value)
     print(f'\nFrom here, you can travel to: \n')
-    for i, j in locations[current_location]['destinations'].items():
-        print(i, ': ', j)
-
-list_objects()
+    for key, value in locations[current_location]['destinations'].items():
+        print(key, ': ', value)
 
 # Function to offer choices and accept user choice
-def make_choice() :
+def make_choice(current_location) :
     #set current_location as global to reassign it
-    global current_location
     numbers_of_objects = list(locations[current_location]['objects'].keys())
     numbers_of_destinations = list(locations[current_location]['destinations'].keys())
     user_choice = input('What do you want to do? Choose 1 to investigate an item, or 2 to leave.')
@@ -204,12 +269,17 @@ def make_choice() :
         item_choice = input(f'Which item do you want to investigate? Choose a number: {numbers_of_objects}')
      #if user chooses option 2, list available destinations to go to
     elif(user_choice == '2') :
+        #ADD CODE IF USER SELECTS INCORRECT OPTION
         new_location_number = int(input(f'Where do you want to go? Choose a number: {numbers_of_destinations}'))
         #reassign current_location
         current_location = str.lower((locations[current_location]['destinations'][new_location_number]))
         print(f'\n--------------You are travelling to {current_location}--------------\n')
-        print_location()
-        list_objects()
-        make_choice()
+        print_location(current_location)
+        list_objects(current_location)
+        make_choice(current_location)
 
-make_choice()
+print_location(current_location)
+
+list_objects(current_location)
+
+make_choice(current_location)
